@@ -4,11 +4,18 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Create Account – Threadly</title>
-  <script type="module" src="js/firebase.js"></script>
   <link rel="stylesheet" href="css/main.css"/>
   <link rel="stylesheet" href="css/auth.css"/>
+
+  <!-- Firebase: check redirect result on page load -->
+  <script type="module">
+    import { handleRedirectResult } from './js/firebase.js';
+    var API = 'https://threadly-backend.onrender.com';
+    handleRedirectResult(API);
+  </script>
 </head>
 <body>
+
 <nav class="nav">
   <div class="nav-inner">
     <a href="index.html" class="nav-logo"><span class="nav-logo-dot"></span>Threadly</a>
@@ -49,9 +56,10 @@
     <div class="auth-form-wrap">
       <p class="auth-eyebrow">Get Started Free</p>
       <h1 class="auth-title">Create your<br/>account</h1>
-      <p class="auth-sub">Already a member? <a href="login.html">Sign in →</a></p>
+      <p class="auth-sub">Already a member? <a href="login.html">Sign in &rarr;</a></p>
 
-      <button class="google-btn" type="button" onclick="handleGoogle()">
+      <!-- Google -->
+      <button class="google-btn" type="button" id="google-btn">
         <svg viewBox="0 0 24 24" width="18" height="18">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
           <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -107,7 +115,7 @@
         <label class="check-row">
           <input type="checkbox" id="terms"/>
           <span class="check-box"></span>
-          <span class="check-txt">I agree to the <a href="#" class="text-coral" style="font-weight:600">Terms of Service</a> and <a href="#" class="text-coral" style="font-weight:600">Privacy Policy</a></span>
+          <span class="check-txt">I agree to the <a href="#" style="color:var(--coral);font-weight:600">Terms of Service</a> and <a href="#" style="color:var(--coral);font-weight:600">Privacy Policy</a></span>
         </label>
         <span class="field-error" id="terms-err"></span>
       </div>
@@ -126,58 +134,61 @@
 
 <div class="toast-stack" id="toast-stack"></div>
 <script src="js/storage.js"></script>
+
+<!-- Wire up Google button via module -->
+<script type="module">
+  import { googleSignIn } from './js/firebase.js';
+  document.getElementById('google-btn').addEventListener('click', function() {
+    googleSignIn().catch(function(err) {
+      console.error(err);
+    });
+  });
+</script>
+
 <script>
-  import('./js/firebase.js').then(function(m) {
-  m.handleRedirectResult();
-});
   redirectIfLoggedIn('dashboard.html');
-  initPwStrength('pw','pw-bar','pw-lbl');
+  initPwStrength('pw', 'pw-bar', 'pw-lbl');
 
   async function doRegister() {
-    var fname    = (document.getElementById('fname').value||'').trim();
-    var lname    = (document.getElementById('lname').value||'').trim();
-    var username = (document.getElementById('username').value||'').trim();
-    var email    = (document.getElementById('email').value||'').trim();
-    var pw       = document.getElementById('pw').value||'';
+    var fname    = (document.getElementById('fname').value    || '').trim();
+    var lname    = (document.getElementById('lname').value    || '').trim();
+    var username = (document.getElementById('username').value || '').trim();
+    var email    = (document.getElementById('email').value    || '').trim();
+    var pw       = document.getElementById('pw').value        || '';
     var terms    = document.getElementById('terms').checked;
-    clearFEs('fname-err','username-err','email-err','pw-err','terms-err');
+    clearFEs('fname-err', 'username-err', 'email-err', 'pw-err', 'terms-err');
 
     var ok = true;
-    if (!fname)             { setFE('fname-err',   'First name is required');       ok=false; }
-    if (!username)          { setFE('username-err','Username is required');          ok=false; }
-    if (!validEmail(email)) { setFE('email-err',   'Enter a valid email address');  ok=false; }
-    if (pw.length < 8)      { setFE('pw-err',      'Password must be 8+ characters'); ok=false; }
-    if (!terms)             { setFE('terms-err',   'You must accept the terms');    ok=false; }
+    if (!fname)             { setFE('fname-err',    'First name is required');          ok = false; }
+    if (!username)          { setFE('username-err', 'Username is required');             ok = false; }
+    if (!validEmail(email)) { setFE('email-err',    'Enter a valid email address');     ok = false; }
+    if (pw.length < 8)      { setFE('pw-err',       'Password must be 8+ characters'); ok = false; }
+    if (!terms)             { setFE('terms-err',    'You must accept the terms');       ok = false; }
     if (!ok) return;
 
-    setBusy('reg-btn',true);
+    setBusy('reg-btn', true);
     try {
       if (USE_BACKEND) {
-        await apiPost('/api/auth/register',{firstName:fname,lastName:lname,username,email,password:pw});
-        Store.savePending({email});
+        await apiPost('/api/auth/register', {
+          firstName: fname, lastName: lname,
+          username: username, email: email, password: pw
+        });
+        Store.savePending({ email: email });
       } else {
         await wait(600);
         var users = Store.getUsers();
-        if (users[email]) { setFE('email-err','This email is already registered'); return; }
+        if (users[email]) { setFE('email-err', 'This email is already registered'); return; }
         var otp = genOTP();
-        Store.savePending({email, otp, data:{firstName:fname, lastName:lname, username, pwh:hashPw(pw), verified:false}});
-        showToast('Verification code generated!','success');
+        Store.savePending({ email: email, otp: otp, data: { firstName: fname, lastName: lname, username: username, pwh: hashPw(pw), verified: false } });
+        showToast('Verification code generated!', 'success');
       }
       window.location.href = 'verify-otp.html';
     } catch(err) {
-      showToast(err.message,'error');
+      showToast(err.message, 'error');
     } finally {
-      setBusy('reg-btn',false);
+      setBusy('reg-btn', false);
     }
   }
-
-  function handleGoogle() {
-  import('./js/firebase.js').then(function(m) {
-    m.googleSignIn().catch(function(err) {
-      showToast(err.message, 'error');
-    });
-  });
-}
 </script>
 </body>
 </html>
