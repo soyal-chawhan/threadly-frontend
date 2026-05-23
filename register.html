@@ -127,6 +127,9 @@
 <div class="toast-stack" id="toast-stack"></div>
 <script src="js/storage.js"></script>
 <script>
+  import('./js/firebase.js').then(function(m) {
+  m.handleRedirectResult();
+});
   redirectIfLoggedIn('dashboard.html');
   initPwStrength('pw','pw-bar','pw-lbl');
 

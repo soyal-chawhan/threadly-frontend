@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDYbxhlhYzpx1VWjx3SZrgJCgKUN6C7o9I",
@@ -15,19 +15,28 @@ const auth     = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 export async function googleSignIn() {
-  const result  = await signInWithPopup(auth, provider);
-  const idToken = await result.user.getIdToken();
+  await signInWithRedirect(auth, provider);
+}
 
-  const res = await fetch('https://threadly-backend.onrender.com/api/auth/google', {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({ idToken })
-  });
+export async function handleRedirectResult() {
+  try {
+    const result = await getRedirectResult(auth);
+    if (!result) return;
 
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Google sign-in failed');
+    const idToken = await result.user.getIdToken();
+    const res = await fetch('https://threadly-backend.onrender.com/api/auth/google', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ idToken })
+    });
 
-  localStorage.setItem('_tl_sess', JSON.stringify(data.user));
-  localStorage.setItem('_tl_tok',  data.token);
-  window.location.href = 'dashboard.html';
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Google sign-in failed');
+
+    localStorage.setItem('_tl_sess', JSON.stringify(data.user));
+    localStorage.setItem('_tl_tok',  data.token);
+    window.location.href = 'dashboard.html';
+  } catch(err) {
+    console.error('Redirect result error:', err);
+  }
 }
