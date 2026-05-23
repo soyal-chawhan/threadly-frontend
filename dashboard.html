@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard – Threadly</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <link rel="stylesheet" href="css/dashboard.css"/>
+  <link rel="stylesheet" href="css/dashboard-extra.css"/>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><span class="nav-logo-dot"></span>Threadly</a>
+    <div class="nav-links">
+      <span id="nav-username" style="font-size:0.875rem;font-weight:600;color:var(--grey-1)"></span>
+      <button class="nav-btn notif-nav-btn" onclick="openModal('modal-notifications')" style="background:var(--grey-5);color:var(--grey-1);border:1px solid var(--grey-4);position:relative">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span id="notif-badge" class="notif-badge hidden">0</span>
+      </button>
+      <button class="nav-btn" onclick="doLogout()" style="background:var(--grey-5);color:var(--grey-1);border:1px solid var(--grey-4)">Sign Out</button>
+    </div>
+  </div>
+</nav>
+
+<div class="page-body">
+<div class="dash-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section-label">Main</div>
+    <a href="#" class="sidebar-item active" onclick="showTab('tab-home',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a href="#" class="sidebar-item" onclick="showTab('tab-feed',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+      My Feed
+    </a>
+    <a href="#" class="sidebar-item" onclick="showTab('tab-communities',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      Communities
+      <span class="sidebar-badge" id="sb-communities">0</span>
+    </a>
+    <a href="#" class="sidebar-item" onclick="showTab('tab-posts',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      My Posts
+      <span class="sidebar-badge" id="sb-posts">0</span>
+    </a>
+
+    <div class="sidebar-section-label">Discover</div>
+    <a href="#" class="sidebar-item" onclick="showTab('tab-explore',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Explore
+    </a>
+    <a href="#" class="sidebar-item" onclick="openModal('modal-notifications')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      Notifications
+      <span class="sidebar-badge" id="sb-notif">0</span>
+    </a>
+
+    <div class="sidebar-section-label">Account</div>
+    <a href="#" class="sidebar-item" onclick="showTab('tab-profile',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+
+    <div class="sidebar-bottom">
+      <button class="sidebar-item" onclick="doLogout()" style="color:var(--error);width:100%">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="dash-main">
+
+    <!-- ═══ TAB: HOME DASHBOARD ═══ -->
+    <div class="tab-panel active" id="tab-home">
+      <div class="dash-topbar">
+        <div>
+          <h1 class="dash-greeting">Hello, <em id="greeting-name">there</em>!</h1>
+          <p class="dash-date" id="dash-date"></p>
+        </div>
+        <div class="dash-topbar-actions">
+          <button class="btn btn-secondary btn-sm" onclick="openModal('modal-create-community')">+ Create Community</button>
+          <button class="btn btn-primary btn-sm" onclick="openModal('modal-write-post')">+ New Post</button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+          <div class="stat-card-num" id="stat-posts">0</div>
+          <div class="stat-card-lbl">Total Posts</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+          <div class="stat-card-num" id="stat-communities">0</div>
+          <div class="stat-card-lbl">Communities</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="18 15 12 9 6 15"/></svg></div>
+          <div class="stat-card-num" id="stat-upvotes">0</div>
+          <div class="stat-card-lbl">Upvotes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+          <div class="stat-card-num" id="stat-karma">0</div>
+          <div class="stat-card-lbl">Karma</div>
+        </div>
+      </div>
+
+      <div class="content-grid">
+        <!-- LEFT -->
+        <div>
+          <!-- Discover Communities -->
+          <div class="section-card" style="margin-bottom:20px">
+            <div class="section-header">
+              <span class="section-title">Discover Communities</span>
+              <span class="section-link" onclick="showTab('tab-explore', document.querySelector('[onclick*=tab-explore]'))">See all</span>
+            </div>
+            <div id="discover-list" class="community-list"></div>
+          </div>
+
+          <!-- Recent Posts -->
+          <div class="section-card">
+            <div class="section-header">
+              <span class="section-title">Recent Posts</span>
+              <span class="section-link" onclick="showTab('tab-posts', document.querySelector('[onclick*=tab-posts]'))">See all</span>
+            </div>
+            <div id="home-posts-list"></div>
+          </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div>
+          <div class="profile-card">
+            <div class="profile-badge">MEMBER</div>
+            <div class="profile-avatar" id="profile-avatar">U</div>
+            <div class="profile-name"  id="profile-name">User</div>
+            <div class="profile-email" id="profile-email">user@example.com</div>
+          </div>
+
+          <div class="section-card">
+            <div class="section-header"><span class="section-title">Quick Actions</span></div>
+            <div class="quick-grid">
+              <button class="quick-tile" onclick="openModal('modal-write-post')">
+                <span class="quick-tile-icon">&#x270F;&#xFE0F;</span>
+                <span class="quick-tile-label">Write a Post</span>
+              </button>
+              <button class="quick-tile" onclick="openModal('modal-create-community')">
+                <span class="quick-tile-icon">&#x1F3D8;&#xFE0F;</span>
+                <span class="quick-tile-label">Create Community</span>
+              </button>
+              <button class="quick-tile" onclick="showTab('tab-explore', document.querySelector('[onclick*=tab-explore]'))">
+                <span class="quick-tile-icon">&#x1F50D;</span>
+                <span class="quick-tile-label">Explore Topics</span>
+              </button>
+              <button class="quick-tile" onclick="openModal('modal-notifications')">
+                <span class="quick-tile-icon">&#x1F514;</span>
+                <span class="quick-tile-label">Notifications</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ TAB: MY FEED ═══ -->
+    <div class="tab-panel" id="tab-feed">
+      <div class="dash-topbar">
+        <div><h1 class="dash-greeting">My <em>Feed</em></h1><p class="dash-date">Posts from communities you joined</p></div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-write-post')">+ New Post</button>
+      </div>
+      <div id="feed-list"></div>
+    </div>
+
+    <!-- ═══ TAB: COMMUNITIES ═══ -->
+    <div class="tab-panel" id="tab-communities">
+      <div class="dash-topbar">
+        <div><h1 class="dash-greeting">My <em>Communities</em></h1><p class="dash-date">Communities you have joined</p></div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-create-community')">+ Create</button>
+      </div>
+      <div id="my-communities-list"></div>
+    </div>
+
+    <!-- ═══ TAB: MY POSTS ═══ -->
+    <div class="tab-panel" id="tab-posts">
+      <div class="dash-topbar">
+        <div><h1 class="dash-greeting">My <em>Posts</em></h1><p class="dash-date">Everything you have published</p></div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-write-post')">+ New Post</button>
+      </div>
+      <div id="my-posts-list"></div>
+    </div>
+
+    <!-- ═══ TAB: EXPLORE ═══ -->
+    <div class="tab-panel" id="tab-explore">
+      <div class="dash-topbar">
+        <div><h1 class="dash-greeting">Explore <em>Communities</em></h1><p class="dash-date">Find communities to join</p></div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-create-community')">+ Create New</button>
+      </div>
+      <div class="explore-search-wrap">
+        <input class="field-input" type="text" id="explore-search" placeholder="Search communities..." oninput="renderExplore()" style="margin-bottom:20px"/>
+      </div>
+      <div id="explore-list"></div>
+    </div>
+
+    <!-- ═══ TAB: PROFILE ═══ -->
+    <div class="tab-panel" id="tab-profile">
+      <div class="dash-topbar">
+        <div><h1 class="dash-greeting">My <em>Profile</em></h1></div>
+      </div>
+      <div class="profile-page-grid">
+        <div class="profile-big-card">
+          <div class="profile-big-avatar" id="big-avatar">U</div>
+          <h2 class="profile-big-name"  id="big-name">User</h2>
+          <p  class="profile-big-email" id="big-email">user@example.com</p>
+          <p  class="profile-big-username" id="big-username">@username</p>
+          <div class="profile-big-stats">
+            <div><span id="pb-posts">0</span><small>Posts</small></div>
+            <div><span id="pb-communities">0</span><small>Communities</small></div>
+            <div><span id="pb-karma">0</span><small>Karma</small></div>
+          </div>
+        </div>
+        <div>
+          <div class="section-card">
+            <div class="section-header"><span class="section-title">Recent Activity</span></div>
+            <div id="profile-activity"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+</div>
+
+<!-- ════════════════ MODALS ════════════════ -->
+
+<!-- WRITE POST -->
+<div class="modal-overlay hidden" id="modal-write-post" onclick="overlayClose(event,'modal-write-post')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 class="modal-title">Create a Post</h3>
+      <button class="modal-close" onclick="closeModal('modal-write-post')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label class="field-label">Community</label>
+        <select class="field-input" id="post-community">
+          <option value="">-- Select a community --</option>
+        </select>
+        <span class="field-error" id="post-community-err"></span>
+      </div>
+      <div class="field">
+        <label class="field-label">Post Title</label>
+        <input class="field-input" type="text" id="post-title" placeholder="What's on your mind?"/>
+        <span class="field-error" id="post-title-err"></span>
+      </div>
+      <div class="field">
+        <label class="field-label">Content</label>
+        <textarea class="field-input" id="post-content" rows="5" placeholder="Write your post here..."></textarea>
+        <span class="field-error" id="post-content-err"></span>
+      </div>
+      <div class="field">
+        <label class="field-label">Post Type</label>
+        <div style="display:flex;gap:10px">
+          <label class="type-radio"><input type="radio" name="post-type" value="text" checked/> Text</label>
+          <label class="type-radio"><input type="radio" name="post-type" value="link"/> Link</label>
+          <label class="type-radio"><input type="radio" name="post-type" value="image"/> Image</label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-write-post')">Cancel</button>
+      <button class="btn btn-primary" id="submit-post-btn" onclick="submitPost()">
+        <span class="lbl">Publish Post</span><span class="spin btn-spinner hidden"></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE COMMUNITY -->
+<div class="modal-overlay hidden" id="modal-create-community" onclick="overlayClose(event,'modal-create-community')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 class="modal-title">Create a Community</h3>
+      <button class="modal-close" onclick="closeModal('modal-create-community')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label class="field-label">Community Name</label>
+        <div style="position:relative">
+          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--grey-3);font-size:0.95rem">r/</span>
+          <input class="field-input" type="text" id="comm-name" placeholder="mycommunity" style="padding-left:32px"/>
+        </div>
+        <span class="field-hint">Lowercase letters, numbers, underscores only</span>
+        <span class="field-error" id="comm-name-err"></span>
+      </div>
+      <div class="field">
+        <label class="field-label">Description</label>
+        <textarea class="field-input" id="comm-desc" rows="3" placeholder="What is this community about?"></textarea>
+        <span class="field-error" id="comm-desc-err"></span>
+      </div>
+      <div class="field">
+        <label class="field-label">Category</label>
+        <select class="field-input" id="comm-category">
+          <option value="Technology">Technology</option>
+          <option value="Science">Science</option>
+          <option value="Gaming">Gaming</option>
+          <option value="Music">Music</option>
+          <option value="Art">Art</option>
+          <option value="Sports">Sports</option>
+          <option value="News">News</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label">Privacy</label>
+        <div style="display:flex;gap:16px">
+          <label class="type-radio"><input type="radio" name="comm-privacy" value="public" checked/> Public</label>
+          <label class="type-radio"><input type="radio" name="comm-privacy" value="private"/> Private</label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-create-community')">Cancel</button>
+      <button class="btn btn-primary" id="create-comm-btn" onclick="createCommunity()">
+        <span class="lbl">Create Community</span><span class="spin btn-spinner hidden"></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- POST DETAIL -->
+<div class="modal-overlay hidden" id="modal-post-detail" onclick="overlayClose(event,'modal-post-detail')">
+  <div class="modal-box modal-box-lg">
+    <div class="modal-header">
+      <h3 class="modal-title" id="detail-title">Post</h3>
+      <button class="modal-close" onclick="closeModal('modal-post-detail')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="post-detail-meta" id="detail-meta"></div>
+      <div class="post-detail-body" id="detail-body"></div>
+      <div class="post-detail-votes" id="detail-votes"></div>
+      <hr style="border:none;border-top:1px solid var(--grey-4);margin:20px 0"/>
+      <h4 style="font-size:0.9rem;font-weight:700;margin-bottom:14px">Comments <span id="comment-count">(0)</span></h4>
+      <div id="comments-list" style="margin-bottom:16px"></div>
+      <div class="field">
+        <textarea class="field-input" id="comment-input" rows="3" placeholder="Write a comment..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-post-detail')">Close</button>
+      <button class="btn btn-primary" onclick="submitComment()">Post Comment</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATIONS -->
+<div class="modal-overlay hidden" id="modal-notifications" onclick="overlayClose(event,'modal-notifications')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 class="modal-title">Notifications</h3>
+      <button class="modal-close" onclick="closeModal('modal-notifications')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="notif-list"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="markAllRead()">Mark all read</button>
+      <button class="btn btn-primary" onclick="closeModal('modal-notifications')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toast-stack"></div>
+<script src="js/storage.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

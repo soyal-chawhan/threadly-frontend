@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Verify Email – Threadly</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <link rel="stylesheet" href="css/auth.css"/>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><span class="nav-logo-dot"></span>Threadly</a>
+    <div class="nav-links">
+      <a href="register.html" class="nav-link">← Back to register</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-body">
+<div class="auth-page">
+
+  <div class="auth-panel-left">
+    <div class="deco-grid"></div>
+    <div class="auth-left-top">
+      <div class="auth-left-logo"><span class="dot"></span>Threadly</div>
+      <h2 class="auth-left-headline">Almost<br/><em>there.</em></h2>
+      <p class="auth-left-sub">One last step — verify your email to unlock your account and join your first community.</p>
+    </div>
+    <div class="auth-left-bottom">
+      <div class="auth-testimonial">
+        <p class="auth-testimonial-text">"Took me 30 seconds to verify. Next thing I knew I was already deep in a discussion about astrophysics."</p>
+        <div class="auth-testimonial-author">
+          <div class="auth-testimonial-avatar" style="background:#2980b9">A</div>
+          <div>
+            <div class="auth-testimonial-name">Arjun K.</div>
+            <div class="auth-testimonial-role">r/Space member</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-panel-right">
+    <div class="auth-form-wrap">
+      <div class="otp-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
+          <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>
+      </div>
+
+      <p class="auth-eyebrow">Email Verification</p>
+      <h1 class="auth-title">Enter your<br/>6-digit code</h1>
+      <p class="otp-hint">Sent to <strong id="email-display">your email</strong>. Enter it below to activate your account.</p>
+
+      <div class="demo-pill" id="demo-pill">
+        <span class="demo-dot"></span>
+        Demo mode &mdash; your code is: <strong id="demo-code">------</strong>
+      </div>
+
+      <div class="otp-row">
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-cell" id="o0" autocomplete="off"/>
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-cell" id="o1" autocomplete="off"/>
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-cell" id="o2" autocomplete="off"/>
+        <span class="otp-dash">&#8211;</span>
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-cell" id="o3" autocomplete="off"/>
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-cell" id="o4" autocomplete="off"/>
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-cell" id="o5" autocomplete="off"/>
+      </div>
+      <span class="field-error" id="otp-err" style="text-align:center;display:block"></span>
+
+      <div class="timer-line" id="timer-line">Resend code in <strong id="timer-num">30</strong>s</div>
+      <div style="text-align:center;margin-bottom:8px">
+        <button class="btn btn-ghost btn-sm hidden" id="resend-btn" type="button" onclick="doResend()">Resend Code</button>
+      </div>
+
+      <button class="btn btn-primary btn-full mt-md" id="verify-btn" type="button" onclick="doVerify()">
+        <span class="lbl">Verify &amp; Activate Account</span>
+        <span class="spin btn-spinner hidden"></span>
+      </button>
+
+      <p class="auth-switch"><a href="register.html">&#8592; Back to registration</a></p>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<div class="toast-stack" id="toast-stack"></div>
+<script src="js/storage.js"></script>
+<script>
+  var OTP_IDS  = ['o0','o1','o2','o3','o4','o5'];
+  var timerRef = null;
+
+  function startTimer() {
+    clearInterval(timerRef);
+    var n        = 30;
+    var lineEl   = document.getElementById('timer-line');
+    var numEl    = document.getElementById('timer-num');
+    var resendEl = document.getElementById('resend-btn');
+    lineEl.classList.remove('hidden');
+    resendEl.classList.add('hidden');
+    numEl.textContent = n;
+    timerRef = setInterval(function() {
+      n--;
+      numEl.textContent = n;
+      if (n <= 0) {
+        clearInterval(timerRef);
+        lineEl.classList.add('hidden');
+        resendEl.classList.remove('hidden');
+      }
+    }, 1000);
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var p = Store.getPending();
+    if (!p) { window.location.href = 'register.html'; return; }
+    document.getElementById('email-display').textContent = p.email;
+    if (!USE_BACKEND && p.otp) {
+      document.getElementById('demo-code').textContent    = p.otp;
+      document.getElementById('demo-pill').style.display  = 'flex';
+    }
+    setupOTP(OTP_IDS);
+    startTimer();
+    document.getElementById('o0').focus();
+  });
+
+  async function doVerify() {
+    var otp = getOTPValue(OTP_IDS);
+    setFE('otp-err', '');
+    if (otp.length < 6 || otp.trim() === '') {
+      setFE('otp-err', 'Please enter all 6 digits');
+      return;
+    }
+
+    setBusy('verify-btn', true);
+    try {
+      if (USE_BACKEND) {
+        var p = Store.getPending();
+        await apiPost('/api/auth/verify-otp', { email: p.email, otp: otp });
+        Store.clearPending();
+      } else {
+        await wait(500);
+        var p = Store.getPending();
+        if (!p)            { setFE('otp-err', 'Session expired — please register again'); return; }
+        if (otp !== p.otp) { setFE('otp-err', 'Incorrect code — try again');              return; }
+        var users = Store.getUsers();
+        users[p.email] = Object.assign({}, p.data, { verified: true });
+        Store.saveUsers(users);
+        Store.clearPending();
+      }
+      clearInterval(timerRef);
+      window.location.href = 'success.html';
+    } catch(err) {
+      setFE('otp-err', err.message);
+    } finally {
+      setBusy('verify-btn', false);
+    }
+  }
+
+  async function doResend() {
+    if (USE_BACKEND) {
+      var p = Store.getPending();
+      try { await apiPost('/api/auth/resend-otp', { email: p.email }); showToast('Code resent!', 'success'); }
+      catch(err) { showToast(err.message, 'error'); }
+    } else {
+      var p = Store.getPending();
+      if (p) {
+        p.otp = genOTP();
+        Store.savePending(p);
+        document.getElementById('demo-code').textContent = p.otp;
+        showToast('New code generated!', 'success');
+      }
+    }
+    OTP_IDS.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) { el.value = ''; el.classList.remove('filled'); }
+    });
+    startTimer();
+    document.getElementById('o0').focus();
+  }
+</script>
+</body>
+</html>

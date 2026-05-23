@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Threadly – Find Your Community</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <style>
+    /* ── LANDING PAGE STYLES ── */
+    .hero {
+      min-height: calc(100vh - 64px);
+      display: flex; align-items: center;
+      padding: 80px 32px;
+      max-width: 1200px;
+      margin: 0 auto;
+      gap: 80px;
+    }
+    .hero-left  { flex: 1; }
+    .hero-right { flex: 1; display: flex; justify-content: flex-end; }
+
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--coral-light); color: var(--coral);
+      border: 1px solid var(--coral-mid);
+      padding: 6px 16px; border-radius: var(--r-full);
+      font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em;
+      margin-bottom: 28px;
+    }
+    .hero-tag-dot { width: 7px; height: 7px; background: var(--coral); border-radius: 50%; }
+
+    .hero-title {
+      font-family: var(--font-head);
+      font-size: 4.2rem; font-weight: 900;
+      line-height: 1.05; letter-spacing: -0.045em;
+      color: var(--black); margin-bottom: 24px;
+    }
+    .hero-title em { color: var(--coral); font-style: italic; }
+    .hero-title span { display: block; }
+
+    .hero-desc {
+      font-size: 1.05rem; color: var(--grey-2);
+      line-height: 1.7; max-width: 440px; margin-bottom: 40px; font-weight: 300;
+    }
+
+    .hero-cta { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 56px; }
+
+    .hero-social-proof { display: flex; align-items: center; gap: 14px; }
+    .proof-avatars { display: flex; }
+    .proof-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 2px solid var(--ivory);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; color: white;
+      margin-left: -8px;
+    }
+    .proof-avatar:first-child { margin-left: 0; }
+    .proof-text { font-size: 0.84rem; color: var(--grey-2); font-weight: 500; }
+    .proof-text strong { color: var(--black); }
+
+    /* Hero visual card */
+    .hero-card {
+      background: var(--white);
+      border: 1px solid var(--grey-4);
+      border-radius: 28px;
+      padding: 28px;
+      width: 380px;
+      box-shadow: var(--shadow-xl);
+    }
+    .hero-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .hero-card-avatar {
+      width: 46px; height: 46px; border-radius: var(--r-md);
+      background: var(--coral); color: white;
+      font-family: var(--font-head); font-size: 1.2rem; font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .hero-card-name  { font-weight: 700; font-size: 0.95rem; }
+    .hero-card-meta  { font-size: 0.78rem; color: var(--grey-3); margin-top: 2px; }
+    .hero-card-stat-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 20px; }
+    .hero-card-stat {
+      background: var(--grey-5); border-radius: var(--r-md);
+      padding: 14px 10px; text-align: center;
+    }
+    .hero-card-stat-n { font-family: var(--font-head); font-size: 1.3rem; font-weight: 900; color: var(--coral); display: block; }
+    .hero-card-stat-l { font-size: 0.68rem; color: var(--grey-3); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+    .hero-card-posts  { display: flex; flex-direction: column; gap: 10px; }
+    .hero-card-post {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px; border: 1px solid var(--grey-4); border-radius: var(--r-md);
+      cursor: pointer; transition: all 0.18s var(--ease);
+    }
+    .hero-card-post:hover { border-color: var(--coral-mid); background: var(--coral-light); }
+    .hero-card-post-icon { font-size: 1.2rem; }
+    .hero-card-post-title { font-size: 0.82rem; font-weight: 600; color: var(--black); }
+    .hero-card-post-meta  { font-size: 0.72rem; color: var(--grey-3); margin-top: 2px; }
+    .hero-card-post-votes { margin-left: auto; display: flex; align-items: center; gap: 4px; font-size: 0.78rem; font-weight: 700; color: var(--grey-2); }
+
+    /* Feature section */
+    .features { padding: 100px 32px; background: var(--white); border-top: 1px solid var(--grey-4); }
+    .features-inner { max-width: 1100px; margin: 0 auto; }
+    .section-eyebrow { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.18em; color: var(--coral); text-transform: uppercase; margin-bottom: 12px; }
+    .section-heading {
+      font-family: var(--font-head); font-size: 2.6rem; font-weight: 900;
+      color: var(--black); letter-spacing: -0.04em; margin-bottom: 16px; max-width: 560px; line-height: 1.1;
+    }
+    .section-heading em { color: var(--coral); font-style: italic; }
+    .section-sub { color: var(--grey-2); font-size: 1rem; max-width: 500px; margin-bottom: 64px; line-height: 1.65; font-weight: 300; }
+    .features-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+    .feature-card {
+      padding: 32px 28px; border: 1px solid var(--grey-4);
+      border-radius: var(--r-xl); background: var(--ivory);
+      transition: all 0.22s var(--ease);
+    }
+    .feature-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); border-color: var(--grey-3); }
+    .feature-icon {
+      width: 48px; height: 48px; border-radius: var(--r-md);
+      background: var(--coral-light); color: var(--coral);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; margin-bottom: 20px;
+    }
+    .feature-title { font-family: var(--font-head); font-size: 1.1rem; font-weight: 700; color: var(--black); margin-bottom: 8px; }
+    .feature-desc  { font-size: 0.875rem; color: var(--grey-2); line-height: 1.65; font-weight: 300; }
+
+    /* CTA band */
+    .cta-band {
+      background: var(--black); padding: 96px 32px; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .cta-band::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(255,92,58,0.2), transparent 60%);
+      pointer-events: none;
+    }
+    .cta-band-title {
+      font-family: var(--font-head); font-size: 3rem; font-weight: 900;
+      color: white; letter-spacing: -0.04em; margin-bottom: 16px;
+      position: relative; z-index: 1;
+    }
+    .cta-band-title em { color: var(--coral); font-style: italic; }
+    .cta-band-sub {
+      color: rgba(255,255,255,0.5); font-size: 1rem; margin-bottom: 40px;
+      font-weight: 300; position: relative; z-index: 1;
+    }
+    .cta-band-btns { display: flex; gap: 14px; justify-content: center; position: relative; z-index: 1; }
+
+    @media (max-width: 960px) {
+      .hero { flex-direction: column; gap: 48px; padding: 60px 24px; }
+      .hero-right { justify-content: center; }
+      .hero-card  { width: 100%; max-width: 380px; }
+      .hero-title { font-size: 3rem; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px) {
+      .hero-title { font-size: 2.4rem; }
+      .features-grid { grid-template-columns: 1fr; }
+      .cta-band-title { font-size: 2rem; }
+      .cta-band-btns  { flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><span class="nav-logo-dot"></span>Threadly</a>
+    <div class="nav-links">
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#communities" class="nav-link">Communities</a>
+      <a href="login.html" class="nav-link">Sign In</a>
+      <a href="register.html" class="nav-btn">Get Started Free</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-body">
+
+  <!-- HERO -->
+  <section>
+    <div class="hero">
+      <div class="hero-left">
+        <div class="hero-tag"><span class="hero-tag-dot"></span> Now in Public Beta</div>
+        <h1 class="hero-title">
+          <span>Where Real</span>
+          <span><em>Conversations</em></span>
+          <span>Happen.</span>
+        </h1>
+        <p class="hero-desc">Threadly brings people together around shared interests. Create communities, share ideas, vote on what matters, and be part of something bigger.</p>
+        <div class="hero-cta">
+          <a href="register.html" class="btn btn-primary btn-lg">Join Free — No Card Needed</a>
+          <a href="login.html"    class="btn btn-secondary btn-lg">Sign In</a>
+        </div>
+        <div class="hero-social-proof">
+          <div class="proof-avatars">
+            <div class="proof-avatar" style="background:#e67e22">A</div>
+            <div class="proof-avatar" style="background:#16a085">M</div>
+            <div class="proof-avatar" style="background:#8e44ad">K</div>
+            <div class="proof-avatar" style="background:#2980b9">S</div>
+          </div>
+          <p class="proof-text">Join <strong>84,000+</strong> members already on Threadly</p>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="hero-card">
+          <div class="hero-card-header">
+            <div class="hero-card-avatar">J</div>
+            <div>
+              <div class="hero-card-name">Jane Doe</div>
+              <div class="hero-card-meta">@janedoe · Member since 2024</div>
+            </div>
+          </div>
+          <div class="hero-card-stat-row">
+            <div class="hero-card-stat"><span class="hero-card-stat-n">24</span><span class="hero-card-stat-l">Posts</span></div>
+            <div class="hero-card-stat"><span class="hero-card-stat-n">7</span><span class="hero-card-stat-l">Communities</span></div>
+            <div class="hero-card-stat"><span class="hero-card-stat-n">1.2k</span><span class="hero-card-stat-l">Karma</span></div>
+          </div>
+          <div class="hero-card-posts">
+            <div class="hero-card-post">
+              <span class="hero-card-post-icon">🚀</span>
+              <div>
+                <div class="hero-card-post-title">My experience with React 19</div>
+                <div class="hero-card-post-meta">r/webdev · 2h ago</div>
+              </div>
+              <div class="hero-card-post-votes">▲ 342</div>
+            </div>
+            <div class="hero-card-post">
+              <span class="hero-card-post-icon">🎨</span>
+              <div>
+                <div class="hero-card-post-title">UI trends in 2025</div>
+                <div class="hero-card-post-meta">r/design · 5h ago</div>
+              </div>
+              <div class="hero-card-post-votes">▲ 218</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features" id="features">
+    <div class="features-inner">
+      <div class="section-eyebrow">Why Threadly</div>
+      <h2 class="section-heading">Everything you need to <em>build a community</em></h2>
+      <p class="section-sub">From creating your first subreddit to moderating thousands of members — Threadly gives you the tools to grow.</p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🏘️</div>
+          <h3 class="feature-title">Create Communities</h3>
+          <p class="feature-desc">Start a community around any topic in seconds. Customize rules, appearance, and moderation settings.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🗳️</div>
+          <h3 class="feature-title">Democratic Voting</h3>
+          <p class="feature-desc">Upvote the content that matters. Community-driven ranking puts the best discussions at the top.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">💬</div>
+          <h3 class="feature-title">Rich Discussions</h3>
+          <p class="feature-desc">Threaded comments, markdown support, and real-time notifications keep conversations flowing.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔒</div>
+          <h3 class="feature-title">Secure & Private</h3>
+          <p class="feature-desc">Email verification, JWT auth, and granular privacy controls keep your account and data safe.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📱</div>
+          <h3 class="feature-title">Works Everywhere</h3>
+          <p class="feature-desc">Fully responsive design that looks great on mobile, tablet, and desktop.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3 class="feature-title">Real-Time Updates</h3>
+          <p class="feature-desc">Live vote counts, instant notifications, and real-time comment threads keep you in the loop.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA BAND -->
+  <section class="cta-band">
+    <h2 class="cta-band-title">Ready to find your <em>community?</em></h2>
+    <p class="cta-band-sub">Join thousands of people having real conversations about things they love.</p>
+    <div class="cta-band-btns">
+      <a href="register.html" class="btn btn-primary btn-lg">Create Free Account</a>
+      <a href="login.html"    class="btn btn-ghost btn-lg" style="color:rgba(255,255,255,0.7);border-color:rgba(255,255,255,0.15)">Sign In</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <span class="footer-logo">Threadly</span>
+      <div class="footer-links">
+        <a href="#">About</a>
+        <a href="#">Terms</a>
+        <a href="#">Privacy</a>
+        <a href="#">Help</a>
+      </div>
+      <span>&copy; 2025 Threadly. All rights reserved.</span>
+    </div>
+  </footer>
+
+</div>
+<div class="toast-stack" id="toast-stack"></div>
+<script src="js/storage.js"></script>
+</body>
+</html>

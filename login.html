@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign In – Threadly</title>
+  <script type="module" src="js/firebase.js"></script>
+  <link rel="stylesheet" href="css/main.css"/>
+  <link rel="stylesheet" href="css/auth.css"/>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><span class="nav-logo-dot"></span>Threadly</a>
+    <div class="nav-links">
+      <a href="register.html" class="nav-link">Create account</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-body">
+<div class="auth-page">
+
+  <!-- LEFT PANEL -->
+  <div class="auth-panel-left">
+    <div class="deco-grid"></div>
+    <div class="auth-left-top">
+      <div class="auth-left-logo"><span class="dot"></span>Threadly</div>
+      <h2 class="auth-left-headline">Good to see<br/>you <em>again.</em></h2>
+      <p class="auth-left-sub">Your communities are waiting. Sign back in and jump into the conversations that matter to you.</p>
+    </div>
+    <div class="auth-left-bottom">
+      <div class="auth-testimonial">
+        <p class="auth-testimonial-text">"Threadly replaced every other forum I used. The communities here actually talk about stuff that matters."</p>
+        <div class="auth-testimonial-author">
+          <div class="auth-testimonial-avatar">R</div>
+          <div>
+            <div class="auth-testimonial-name">Rohit M.</div>
+            <div class="auth-testimonial-role">Member since 2024</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL (FORM) -->
+  <div class="auth-panel-right">
+    <div class="auth-form-wrap">
+      <p class="auth-eyebrow">Welcome Back</p>
+      <h1 class="auth-title">Sign in to<br/>your account</h1>
+      <p class="auth-sub">No account yet? <a href="register.html">Create one free →</a></p>
+
+      <!-- Google -->
+      <button class="google-btn" type="button" onclick="handleGoogle()">
+        <svg viewBox="0 0 24 24" width="18" height="18">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <div class="or-divider"><span>or</span></div>
+
+      <!-- Email -->
+      <div class="field">
+        <label class="field-label" for="email">Email Address</label>
+        <input class="field-input" type="email" id="email" placeholder="you@example.com" autocomplete="email"/>
+        <span class="field-error" id="email-err"></span>
+      </div>
+
+      <!-- Password -->
+      <div class="field">
+        <div class="clearfix">
+          <label class="field-label" for="pw">Password</label>
+          <a href="forgot-password.html" class="forgot-link">Forgot password?</a>
+        </div>
+        <div class="input-wrap">
+          <input class="field-input" type="password" id="pw" placeholder="••••••••" autocomplete="current-password"/>
+          <button class="input-eye" type="button" onclick="togglePw('pw',this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <span class="field-error" id="pw-err"></span>
+      </div>
+
+      <button class="btn btn-primary btn-full" id="login-btn" type="button" onclick="doLogin()">
+        <span class="lbl">Sign In</span>
+        <span class="spin btn-spinner hidden"></span>
+      </button>
+
+      <p class="auth-switch">New to Threadly? <a href="register.html">Create a free account</a></p>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<div class="toast-stack" id="toast-stack"></div>
+<script src="js/storage.js"></script>
+<script>
+  redirectIfLoggedIn('dashboard.html');
+
+  async function doLogin() {
+    var email = (document.getElementById('email').value||'').trim();
+    var pw    = document.getElementById('pw').value||'';
+    clearFEs('email-err','pw-err');
+
+    var ok = true;
+    if (!validEmail(email)) { setFE('email-err','Enter a valid email address'); ok=false; }
+    if (!pw)                 { setFE('pw-err',   'Password is required');        ok=false; }
+    if (!ok) return;
+
+    setBusy('login-btn',true);
+    try {
+      if (USE_BACKEND) {
+        var d = await apiPost('/api/auth/login',{email,password:pw});
+        localStorage.setItem('_tl_tok',d.token);
+        Store.saveSession(d.user);
+      } else {
+        await wait(500);
+        var users = Store.getUsers();
+        var u = users[email];
+        if (!u)                   { setFE('email-err','No account found with this email'); return; }
+        if (!u.verified)          { setFE('email-err','Please verify your email first — check your inbox'); return; }
+        if (u.pwh !== hashPw(pw)) { setFE('pw-err',   'Incorrect password'); return; }
+        Store.saveSession({email, firstName:u.firstName, username:u.username});
+      }
+      showToast('Welcome back, '+(Store.getSession().firstName||'')+'!','success');
+      setTimeout(function(){ window.location.href='dashboard.html'; },600);
+    } catch(err) {
+      showToast(err.message,'error');
+    } finally {
+      setBusy('login-btn',false);
+    }
+  }
+
+  function handleGoogle() {
+  import('./js/firebase.js').then(function(m) {
+    m.googleSignIn().catch(function(err) {
+      showToast(err.message, 'error');
+    });
+  });
+}
+
+  document.addEventListener('DOMContentLoaded',function(){
+    document.getElementById('pw').addEventListener('keydown',function(e){ if(e.key==='Enter') doLogin(); });
+    document.getElementById('email').addEventListener('keydown',function(e){ if(e.key==='Enter') document.getElementById('pw').focus(); });
+  });
+</script>
+</body>
+</html>
